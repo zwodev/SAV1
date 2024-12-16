@@ -25,6 +25,7 @@ typedef enum {
     SAV1_PIXEL_FORMAT_YUY2 = 6, /**< { Y0, U0, Y1, V0 } in BT.601 limited range. */
     SAV1_PIXEL_FORMAT_UYVY = 7, /**< { U0, Y0, V0, Y1 } in BT.601 limited range. */
     SAV1_PIXEL_FORMAT_YVYU = 8, /**< { Y0, V0, Y1, U0 } in BT.601 limited range. */
+    SAV1_PIXEL_FORMAT_ORIG = 9
 } Sav1PixelFormat;
 
 typedef enum {

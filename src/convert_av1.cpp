@@ -8,6 +8,7 @@ extern "C" {
 #include "sav1_video_frame.h"
 #include "sav1_settings.h"
 #include "sav1_internal.h"
+#include "memory.h"
 }
 
 using namespace libyuv;
@@ -225,7 +226,8 @@ convert_dav1d_picture(Sav1InternalContext *ctx, Dav1dPicture *picture,
 
     if (desired_pixel_format == SAV1_PIXEL_FORMAT_YUY2 ||
         desired_pixel_format == SAV1_PIXEL_FORMAT_UYVY ||
-        desired_pixel_format == SAV1_PIXEL_FORMAT_YVYU) {
+        desired_pixel_format == SAV1_PIXEL_FORMAT_YVYU ||
+        desired_pixel_format == SAV1_PIXEL_FORMAT_ORIG) {
         // YUV variations
 
         if (seq_hdr->mtrx == DAV1D_MC_IDENTITY) {
@@ -290,6 +292,19 @@ convert_dav1d_picture(Sav1InternalContext *ctx, Dav1dPicture *picture,
                 seq_hdr->layout == DAV1D_PIXEL_LAYOUT_I420) {
                 I420ToYUY2(Y_data, Y_stride, U_data, UV_stride, V_data, UV_stride,
                            output_frame->data, output_frame->stride, width, height);
+            }
+            else if (desired_pixel_format == SAV1_PIXEL_FORMAT_ORIG &&
+                seq_hdr->layout == DAV1D_PIXEL_LAYOUT_I420) {
+                u_int8_t *dst = output_frame->data;
+                int y_size = width * height;
+                int u_size = y_size / 4;
+                int v_size = u_size;
+                memcpy(dst, Y_data, y_size);
+                dst += y_size;
+                memcpy(dst, U_data, u_size);
+                dst += u_size;
+                memcpy(dst, V_data, v_size);
+
             }
             else if (desired_pixel_format == SAV1_PIXEL_FORMAT_YVYU &&
                      seq_hdr->layout == DAV1D_PIXEL_LAYOUT_I420) {
@@ -523,6 +538,7 @@ convert_av1_start(void *context)
             thread_mutex_unlock(convert_context->running);
             return -1;
         }
+
         output_frame->codec = SAV1_CODEC_AV1;
         output_frame->pixel_format = convert_context->desired_pixel_format;
         output_frame->color_depth = 8;
@@ -531,13 +547,29 @@ convert_av1_start(void *context)
         output_frame->custom_data = NULL;
         output_frame->sav1_has_ownership = 1;
 
-        // convert the color space
-        convert_dav1d_picture(convert_context->ctx, dav1d_pic, output_frame);
+        // if (convert_context->desired_pixel_format == SAV1_PIXEL_FORMAT_ORIG) {
+        //     // allocate pixel buffer
+        //     output_frame->stride = 2 * output_frame->width;
+        //     output_frame->size = output_frame->stride * output_frame->height;
+        //     if ((output_frame->data = (uint8_t *)malloc(output_frame->size * sizeof(uint8_t))) == NULL) {
+        //         sav1_set_error(convert_context->ctx, "malloc() failed in convert_dav1d_picture()");
+        //         sav1_set_critical_error_flag(convert_context->ctx);
+        //         return;
+        //     }
 
-        sav1_thread_queue_push(convert_context->output_queue, output_frame);
+        //     sav1_thread_queue_push(convert_context->output_queue, output_frame);
+        //     dav1d_picture_unref(dav1d_pic);
+        //     free(dav1d_pic);
+        // }
+        // else {
+            // convert the color space
+            convert_dav1d_picture(convert_context->ctx, dav1d_pic, output_frame);
 
-        dav1d_picture_unref(dav1d_pic);
-        free(dav1d_pic);
+            sav1_thread_queue_push(convert_context->output_queue, output_frame);
+
+            dav1d_picture_unref(dav1d_pic);
+            free(dav1d_pic);
+        //}
     }
     thread_mutex_unlock(convert_context->running);
 

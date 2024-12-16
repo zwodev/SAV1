@@ -3,12 +3,15 @@ project('sav1', ['c', 'cpp'],
   default_options : ['warning_level=3', 'buildtype=release', 'debug=false', 'cpp_std=c++11', 
   'strip=true']) # STRIP=TRUE strips the debug symbol table, a very significant size saving for builds.
 
+dir_base = meson.current_source_dir()
+
 inc_dirs = []
 inc_dirs += include_directories('include')
 inc_dirs += include_directories('dependencies/libwebm/webm_parser/include')
 inc_dirs += include_directories('dependencies/libwebm/webm_parser') # so it can see .h files in that directory
 inc_dirs += include_directories('dependencies/libyuv/include')
 inc_dirs += include_directories('dependencies/thread')
+
 if get_option('use_subprojects')
   inc_dirs += include_directories('subprojects/dav1d/include') #this could theoretically be a bug in dav1d buildconfig, they include a include in their dav1d_dep statement, maybe the rel path is wrong?
 endif
@@ -134,7 +137,6 @@ yuv_lib = static_library(
 )
 
 c = meson.get_compiler('c')
-dir_base = meson.current_source_dir()
 deps = []
 
 if get_option('use_subprojects')
@@ -150,7 +152,7 @@ elif build_machine.system() == 'windows'
 
 else
   deps += c.find_library('opus', required: true)
-  deps += c.find_library('dav1d', required: true)
+  deps += c.find_library('dav1d', required: true, dirs: join_paths(dir_base, '../dav1d/build/src'))
 endif
 
 # Add thread library dependencies for Windows and Linux
@@ -181,21 +183,21 @@ if build_machine.system() == 'windows'
   sav1play_includes += include_directories('dependencies/x64-windows/include')
 endif
 
-sav1play_deps = []
-if build_machine.system() == 'windows'
-  sav1play_deps += c.find_library('SDL2', required: true, dirs: join_paths(dir_base, 'dependencies/x64-windows/bin'))
-else
-  sav1play_deps += c.find_library('SDL2', required: true)
-endif
-
-executable('sav1play', 'examples/sav1play.c', 
-            include_directories: sav1play_includes,
-            dependencies: sav1play_deps,
-            link_with: sav1_lib,
-            install: true, install_dir: dir_base)
-
-executable('sav1slideshow', 'examples/sav1slideshow.c', 
-            include_directories: sav1play_includes,
-            dependencies: sav1play_deps,
-            link_with: sav1_lib,
-            install: true, install_dir: dir_base)
+#sav1play_deps = []
+#if build_machine.system() == 'windows'
+#  sav1play_deps += c.find_library('SDL2', required: true, dirs: join_paths(dir_base, 'dependencies/x64-windows/bin'))
+#else
+#  sav1play_deps += c.find_library('SDL2', required: true)
+#endif
+#
+#executable('sav1play', 'examples/sav1play.c', 
+#            include_directories: sav1play_includes,
+#            dependencies: sav1play_deps,
+#            link_with: sav1_lib,
+#            install: true, install_dir: dir_base)
+#
+#executable('sav1slideshow', 'examples/sav1slideshow.c', 
+#            include_directories: sav1play_includes,
+#            dependencies: sav1play_deps,
+#            link_with: sav1_lib,
+#            install: true, install_dir: dir_base)
