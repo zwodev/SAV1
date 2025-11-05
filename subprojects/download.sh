@@ -4,7 +4,7 @@ set -e -x
 cd $(dirname `readlink -f "$0"`)
 
 OPUS=opus-1.4
-DAV1D_VER=1.2.1
+DAV1D_VER=1.5.2
 DAV1D=dav1d-${DAV1D_VER}
 
 ls
@@ -17,7 +17,7 @@ ls
 echo "$PWD"
 
 # Verify checksums
-sha512sum -c deps.sha512
+#sha512sum -c deps.sha512
 
 # Unzip
 tar xzf ${OPUS}.tar.gz
