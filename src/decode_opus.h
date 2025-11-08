@@ -1,9 +1,9 @@
 #ifndef DECODE_OPUS_H
 #define DECODE_OPUS_H
 
-#include <opus/opus.h>
-#include <opus/opus_types.h>
-#include <opus/opus_defines.h>
+#include <opus.h>
+#include <opus_types.h>
+#include <opus_defines.h>
 
 #include "sav1_settings.h"
 

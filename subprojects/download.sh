@@ -26,3 +26,6 @@ tar xzf ${DAV1D}.tar.xz
 # Rename directories to the project names
 mv ${OPUS} opus
 mv ${DAV1D} dav1d
+
+# patch
+sed -i '' 's/ and have_arm_intrinsics_or_asm//g' ./opus/silk/meson.build
