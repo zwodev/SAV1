@@ -169,7 +169,7 @@ else
   sav1_name_prefix = 'lib'
 endif
 
-sav1_lib = library('sav1',
+sav1_lib = static_library('sav1',
                    project_source_files,
                    include_directories: inc_dirs,
                    dependencies: deps,
