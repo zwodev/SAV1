@@ -1,7 +1,8 @@
 #!/bin/bash
 set -e -x
+OS=$(uname)
 
-cd $(dirname `readlink -f "$0"`)
+#cd $(dirname `readlink -f "$0"`)
 
 OPUS=opus-1.4
 DAV1D_VER=1.5.2
@@ -20,12 +21,20 @@ echo "$PWD"
 #sha512sum -c deps.sha512
 
 # Unzip
-tar xzf ${OPUS}.tar.gz
-tar xzf ${DAV1D}.tar.xz
+tar xzvf ${OPUS}.tar.gz
+tar xvf ${DAV1D}.tar.xz
 
 # Rename directories to the project names
 mv ${OPUS} opus
 mv ${DAV1D} dav1d
 
-# patch
-sed -i '' 's/ and have_arm_intrinsics_or_asm//g' ./opus/silk/meson.build
+# Patching ./opus/silk/meson.build
+if [ "$OS" == "Linux" ]; then
+  echo "Patching ./opus/silk/meson.build on Linux"
+  sed -i 's/ and have_arm_intrinsics_or_asm//g' ./opus/silk/meson.build
+elif [ "$OS" == "Darwin" ]; then
+  echo "Patching ./opus/silk/meson.build on macOS"
+  sed -i '' 's/ and have_arm_intrinsics_or_asm//g' ./opus/silk/meson.build
+else
+  echo "Unknown OS: $OS"
+fi
