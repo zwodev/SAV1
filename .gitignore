@@ -4,6 +4,7 @@
 *.out
 *.pyc
 .vscode/*
+.vs/*
 sav1play
 sav1slideshow
 dependencies/*
