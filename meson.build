@@ -16,6 +16,7 @@ if get_option('use_subprojects')
   inc_dirs += include_directories('subprojects/dav1d/include') #this could theoretically be a bug in dav1d buildconfig, they include a include in their dav1d_dep statement, maybe the rel path is wrong?
 endif
 if build_machine.system() == 'windows'
+  inc_dirs += include_directories('dependencies/x64-windows/include/opus')
   inc_dirs += include_directories('dependencies/x64-windows/include')
 endif
 
@@ -147,8 +148,8 @@ if get_option('use_subprojects')
   deps += dav1d_proj.get_variable('dav1d_dep')
 
 elif build_machine.system() == 'windows'
-  deps += c.find_library('opus', required: true, dirs: join_paths(dir_base, 'dependencies/x64-windows/bin'))
-  deps += c.find_library('dav1d', required: true, dirs: join_paths(dir_base, 'dependencies/x64-windows/bin'))
+  deps += c.find_library('opus', required: true, dirs: join_paths(dir_base, 'dependencies/x64-windows/lib'))
+  deps += c.find_library('dav1d', required: true, dirs: join_paths(dir_base, 'dependencies/x64-windows/lib'))
 
 else
   deps += c.find_library('opus', required: true)
@@ -178,10 +179,21 @@ sav1_lib = static_library('sav1',
                    install: true,
                    install_dir: dir_base)
 
-sav1play_includes = [include_directories('include')]
 if build_machine.system() == 'windows'
-  sav1play_includes += include_directories('dependencies/x64-windows/include')
+  sav1_dll = shared_library('sav1',
+                   project_source_files,
+                   include_directories: inc_dirs,
+                   dependencies: deps,
+                   link_with: [webm_lib, yuv_lib],
+                   name_prefix: sav1_name_prefix,
+                   install: true,
+                   install_dir: dir_base)
 endif
+
+# sav1play_includes = [include_directories('include')]
+# if build_machine.system() == 'windows'
+#   sav1play_includes += include_directories('dependencies/x64-windows/include')
+# endif
 
 #sav1play_deps = []
 #if build_machine.system() == 'windows'
