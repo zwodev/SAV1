@@ -20,6 +20,8 @@ pip install ninja meson
 install_windows_deps.bat
 ```
 
+In `meson_options.txt`, change the `value` of `use_subprojects` to `false`.
+
 ### MacOS
 
 ```

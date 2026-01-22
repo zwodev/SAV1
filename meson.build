@@ -179,6 +179,17 @@ sav1_lib = static_library('sav1',
                    install: true,
                    install_dir: dir_base)
 
+if build_machine.system() == 'windows'
+  sav1_dll = shared_library('sav1',
+                   project_source_files,
+                   include_directories: inc_dirs,
+                   dependencies: deps,
+                   link_with: [webm_lib, yuv_lib],
+                   name_prefix: sav1_name_prefix,
+                   install: true,
+                   install_dir: dir_base)
+endif
+
 # sav1play_includes = [include_directories('include')]
 # if build_machine.system() == 'windows'
 #   sav1play_includes += include_directories('dependencies/x64-windows/include')
