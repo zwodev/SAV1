@@ -39,6 +39,7 @@ inline int
 get_time(struct timespec const *_Ts)
 {
 #ifdef _WIN64
+    // clock_gettime is not available on Windows, so timespec_get is used instead
     int success = timespec_get(_Ts, TIME_UTC);
     return success == 0;
 #else
@@ -182,7 +183,6 @@ seek_update_start_time(Sav1InternalContext *ctx)
 
     struct timespec curr_time;
     get_time(&curr_time);
-    //clock_gettime(CLOCK_MONOTONIC, &curr_time);
     uint64_t adjusted_seek_timecode = ctx->seek_timecode / ctx->settings->playback_speed;
     ctx->start_time->tv_sec = curr_time.tv_sec - adjusted_seek_timecode / 1000;
     uint64_t timecode_ns = (adjusted_seek_timecode % 1000) * 1000000;
@@ -215,7 +215,6 @@ file_end_update_start_time(Sav1InternalContext *ctx)
 
     // update the start time
     int status = get_time(ctx->start_time);
-    //int status = clock_gettime(CLOCK_MONOTONIC, ctx->start_time);
     if (status) {
         sav1_set_error_with_code(ctx, "clock_gettime() in file end handler returned %d",
                                  status);
@@ -225,7 +224,6 @@ file_end_update_start_time(Sav1InternalContext *ctx)
     // update the pause time
     if (ctx->pause_time != NULL) {
         status = get_time(ctx->pause_time);
-        //status = clock_gettime(CLOCK_MONOTONIC, ctx->pause_time);
         if (status) {
             sav1_set_error_with_code(
                 ctx, "clock_gettime() in file end handler returned %d", status);
@@ -533,7 +531,6 @@ sav1_start_playback(Sav1Context *context)
     if (ctx->pause_time == NULL) {
         // video is not paused so make the beginning now
         status = get_time(ctx->start_time);
-        //status = clock_gettime(CLOCK_MONOTONIC, ctx->start_time);
         if (status) {
             sav1_set_error_with_code(
                 ctx, "clock_gettime() in sav1_start_playback() returned %d", status);
@@ -544,7 +541,6 @@ sav1_start_playback(Sav1Context *context)
         // video is paused so set the start relative to that
         struct timespec curr_time;
         status = get_time(&curr_time);
-        //status = clock_gettime(CLOCK_MONOTONIC, &curr_time);
         if (status) {
             sav1_set_error_with_code(
                 ctx, "clock_gettime() in sav1_start_playback() returned %d", status);
@@ -592,7 +588,6 @@ sav1_stop_playback(Sav1Context *context)
         RAISE_CRITICAL(ctx, "malloc() failed in sav1_stop_playback()")
     }
     int status = get_time(ctx->pause_time);
-    //int status = clock_gettime(CLOCK_MONOTONIC, ctx->pause_time);
     if (status) {
         sav1_set_error_with_code(
             ctx, "clock_gettime() in sav1_stop_playback() returned %d", status);
@@ -684,7 +679,6 @@ sav1_get_playback_time(Sav1Context *context, uint64_t *timecode_ms)
     // get the current time
     struct timespec curr_time;
     int status = get_time(&curr_time);
-    //int status = clock_gettime(CLOCK_MONOTONIC, &curr_time);
     if (status) {
         sav1_set_error_with_code(
             ctx, "clock_gettime() in sav1_get_playback_time() returned %d", status);
@@ -756,7 +750,6 @@ sav1_set_playback_speed(Sav1Context *context, double playback_speed)
     // update start time and pause time based on prev_playback_time
     struct timespec curr_time;
     get_time(&curr_time);
-    //clock_gettime(CLOCK_MONOTONIC, &curr_time);
 
     if (!ctx->is_playing && ctx->pause_time != NULL) {
         ctx->pause_time->tv_sec = curr_time.tv_sec;
