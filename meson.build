@@ -30,6 +30,10 @@ project_source_files = [
   'src/parse.cpp'
 ]
 
+if build_machine.system() == 'windows'
+  project_source_files += ['src/win32_time.c']
+endif
+
 webm_source_files = [
   'dependencies/libwebm/webm_parser/src/ancestory.cc',
   'dependencies/libwebm/webm_parser/src/bit_utils.cc',
@@ -143,7 +147,6 @@ deps += dav1d_proj.get_variable('dav1d_dep')
 # Add thread library dependencies for Windows and Linux
 if build_machine.system() == 'windows'
   deps += c.find_library('winmm', required: true) # for thread.h on windows
-  project_source_files += ['src/win32_time.c']
 endif
 if build_machine.system() == 'linux'
   deps += c.find_library('pthread', required: true)
