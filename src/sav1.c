@@ -5,6 +5,10 @@
 #include "sav1.h"
 #include "sav1_internal.h"
 
+#ifdef _MSC_VER
+#include "win32_time.h"
+#endif
+
 #define CHECK_CTX_VALID(ctx) \
     if (ctx == NULL) {       \
         return -1;           \
