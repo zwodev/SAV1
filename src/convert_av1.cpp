@@ -295,7 +295,7 @@ convert_dav1d_picture(Sav1InternalContext *ctx, Dav1dPicture *picture,
             }
             else if (desired_pixel_format == SAV1_PIXEL_FORMAT_ORIG &&
                 seq_hdr->layout == DAV1D_PIXEL_LAYOUT_I420) {
-                u_int8_t *dst = output_frame->data;
+                uint8_t *dst = output_frame->data;
                 int y_size = width * height;
                 int u_size = y_size / 4;
                 int v_size = u_size;
