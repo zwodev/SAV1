@@ -3,7 +3,8 @@ set -e -x
 OS=$(uname)
 
 OPUS=opus-1.4
-DAV1D=dav1d-1.5.2
+DAV1D_VER=1.5.2
+DAV1D=dav1d-${DAV1D_VER}
 
 # Download sources
 curl -sL --retry 10 http://downloads.xiph.org/releases/opus/${OPUS}.tar.gz > ${OPUS}.tar.gz
