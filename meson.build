@@ -148,17 +148,10 @@ if build_machine.system() == 'linux'
   deps += c.find_library('pthread', required: true)
 endif
 
-if build_machine.system() == 'windows'
-  sav1_name_prefix = ''
-else
-  sav1_name_prefix = 'lib'
-endif
-
 sav1_lib = static_library('sav1',
                    project_source_files,
                    include_directories: inc_dirs,
                    dependencies: deps,
                    link_with: [webm_lib, yuv_lib],
-                   name_prefix: sav1_name_prefix,
                    install: true,
                    install_dir: dir_base)
