@@ -150,10 +150,8 @@ endif
 
 if build_machine.system() == 'windows'
   sav1_name_prefix = ''
-  sav1_name_suffix = 'lib'
 else
   sav1_name_prefix = 'lib'
-  sav1_name_suffix = 'a'
 endif
 
 sav1_lib = static_library('sav1',
@@ -162,6 +160,5 @@ sav1_lib = static_library('sav1',
                    dependencies: deps,
                    link_with: [webm_lib, yuv_lib],
                    name_prefix: sav1_name_prefix,
-                   name_suffix: sav1_name_suffix,
                    install: true,
                    install_dir: dir_base)
