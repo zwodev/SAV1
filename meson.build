@@ -11,13 +11,7 @@ inc_dirs += include_directories('dependencies/libwebm/webm_parser/include')
 inc_dirs += include_directories('dependencies/libwebm/webm_parser') # so it can see .h files in that directory
 inc_dirs += include_directories('dependencies/libyuv/include')
 inc_dirs += include_directories('dependencies/thread')
-
-if get_option('use_subprojects')
-  inc_dirs += include_directories('subprojects/dav1d/include') #this could theoretically be a bug in dav1d buildconfig, they include a include in their dav1d_dep statement, maybe the rel path is wrong?
-endif
-if build_machine.system() == 'windows'
-  inc_dirs += include_directories('dependencies/x64-windows/include')
-endif
+inc_dirs += include_directories('subprojects/dav1d/include') #this could theoretically be a bug in dav1d buildconfig, they include a include in their dav1d_dep statement, maybe the rel path is wrong?
 
 project_source_files = [
   'src/sav1.c',
@@ -139,21 +133,12 @@ yuv_lib = static_library(
 c = meson.get_compiler('c')
 deps = []
 
-if get_option('use_subprojects')
-  opus_proj = subproject('opus', default_options: 'default_library=static')
-  deps += opus_proj.get_variable('opus_dep')
+opus_proj = subproject('opus', default_options: 'default_library=static')
+deps += opus_proj.get_variable('opus_dep')
 
-  dav1d_proj = subproject('dav1d', default_options: ['default_library=static', 'enable_tools=False'])
-  deps += dav1d_proj.get_variable('dav1d_dep')
+dav1d_proj = subproject('dav1d', default_options: ['default_library=static', 'enable_tools=False'])
+deps += dav1d_proj.get_variable('dav1d_dep')
 
-elif build_machine.system() == 'windows'
-  deps += c.find_library('opus', required: true, dirs: join_paths(dir_base, 'dependencies/x64-windows/bin'))
-  deps += c.find_library('dav1d', required: true, dirs: join_paths(dir_base, 'dependencies/x64-windows/bin'))
-
-else
-  deps += c.find_library('opus', required: true)
-  deps += c.find_library('dav1d', required: true, dirs: join_paths(dir_base, '../dav1d/build/src'))
-endif
 
 # Add thread library dependencies for Windows and Linux
 if build_machine.system() == 'windows'
@@ -177,27 +162,3 @@ sav1_lib = static_library('sav1',
                    name_prefix: sav1_name_prefix,
                    install: true,
                    install_dir: dir_base)
-
-sav1play_includes = [include_directories('include')]
-if build_machine.system() == 'windows'
-  sav1play_includes += include_directories('dependencies/x64-windows/include')
-endif
-
-#sav1play_deps = []
-#if build_machine.system() == 'windows'
-#  sav1play_deps += c.find_library('SDL2', required: true, dirs: join_paths(dir_base, 'dependencies/x64-windows/bin'))
-#else
-#  sav1play_deps += c.find_library('SDL2', required: true)
-#endif
-#
-#executable('sav1play', 'examples/sav1play.c', 
-#            include_directories: sav1play_includes,
-#            dependencies: sav1play_deps,
-#            link_with: sav1_lib,
-#            install: true, install_dir: dir_base)
-#
-#executable('sav1slideshow', 'examples/sav1slideshow.c', 
-#            include_directories: sav1play_includes,
-#            dependencies: sav1play_deps,
-#            link_with: sav1_lib,
-#            install: true, install_dir: dir_base)
